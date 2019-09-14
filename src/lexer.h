@@ -33,6 +33,18 @@ class Lexer {
             // 読み込んだ文字が"def"だった場合は関数定義であるためtok_defをreturnし、
             // そうでなければ引数の参照か関数呼び出しであるためtok_identifierをreturnする。
 
+            if (isalpha(lastChar)) {
+                std::string ident = "";
+                ident += lastChar;
+                while(isalpha(lastChar = getNextChar(iFile)))
+                    ident += lastChar;
+                if (ident == "def")
+                    return tok_def;
+                setIdentifier(ident);
+                // std::cout<<"def?"<<ident<<std::endl;
+                return tok_identifier;
+            }
+
             // TODO 1.3: 数字のパーシングを実装してみよう
             // 今読んでいる文字(lastChar)が数字だった場合(isdigit(lastChar) == true)は、
             // 数字が終わるまで読み、その数値をnumValにセットする。

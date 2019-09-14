@@ -31,24 +31,37 @@ Value *LogErrorV(const char *str) {
 
 // TODO 2.4: 引数のcodegenを実装してみよう
 Value *VariableExprAST::codegen() {
-    return nullptr;
+    // return nullptr;
     // NamedValuesの中にVariableExprAST::NameとマッチするValueがあるかチェックし、
     // あったらそのValueを返す。
+    // std::cout<<"vAST"<<NamedValues<<std::endl;
+    Value *V = NamedValues[variableName];
+    if (!V)
+        return LogErrorV("Unknown variable name in VariableExprAST::codegen().");
+    return V;
 }
 
 // TODO 2.5: 関数呼び出しのcodegenを実装してみよう
 Value *CallExprAST::codegen() {
-    return nullptr;
+    // return nullptr;
     // 1. myModule->getFunctionを用いてcalleeがdefineされているかを
     // チェックし、されていればそのポインタを得る。
-
+    Function *callee_function = myModule->getFunction(callee);
+    if (!callee_function)
+        return LogErrorV("Unknown function referenced in CallExprAST::codegen().");
     // 2. llvm::Function::arg_sizeと実際に渡されたargsのサイズを比べ、
     // サイズが間違っていたらエラーを出力。
-
+    if (callee_function->arg_size() != args.size())
+        return LogErrorV("Incorrect number of arguments in CallExprAST::codegen().");
     std::vector<Value *> argsV;
     // 3. argsをそれぞれcodegenしllvm::Valueにし、argsVにpush_backする。
-
+    for (unsigned i = 0, e = args.size(); i != e; ++i) {
+        argsV.push_back(args[i]->codegen());
+        if (!argsV.back())
+            return nullptr;
+    }
     // 4. IRBuilderのCreateCallを呼び出し、Valueをreturnする。
+    return Builder.CreateCall(callee_function, argsV, "calltmp");
 }
 
 Value *BinaryAST::codegen() {
@@ -163,6 +176,7 @@ static void HandleTopLevelExpression() {
 static void MainLoop() {
     myModule = llvm::make_unique<Module>("my cool jit", Context);
     while (true) {
+        // std::cout<<"loop?"<<CurTok<<std::endl;
         switch (CurTok) {
             case tok_eof:
                 // ここで最終的なLLVM IRをプリントしています。
