@@ -130,7 +130,7 @@ Value *CallExprAST::codegen() {
 }
 ```
 # 2.6
-- これかなり感動しました。ELF見ても何も分からなかった。
+- これかなり感動しました。ELF見ても何も分からなかった。(cat ELFしたのでそれはそう)
 - `objdump -d main`の一部
 ```
 00000000004008b0 <foobar>:
